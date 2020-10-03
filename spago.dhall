@@ -2,12 +2,10 @@
 Welcome to a Spago project!
 You can edit this file as you like.
 -}
-{ name = "my-project"
+{ name = "typelevel-klank-dev"
 , dependencies =
   [ "audio-behaviors"
-  , "canvas"
   , "console"
-  , "drawing"
   , "effect"
   , "psci-support"
   ]
