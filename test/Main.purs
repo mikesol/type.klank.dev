@@ -8,10 +8,10 @@ import Data.Typelevel.Num (class Pos, D1)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample(..), gain', makeAudioTrack, makeFloatArray, runInBrowser, speaker')
+import FRP.Behavior.Audio (AudioParameter(..), AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample(..), makeAudioTrack, makeFloatArray, runInBrowser, speaker')
 import Math (pi, abs)
 import Type.Data.Row (RProxy(..))
-import Type.Klank.Dev (FloatArrays, Main, Tracks, affableRec, tPeriodicOsc, tPlay, tPlayBuf, tWaveShaper)
+import Type.Klank.Dev (type (:$), ConsSymbol, FloatArrays, Main, NilS, NilSymbol, PlaySignature, SymbolListProxy, Tracks, WaveShaperSignature, Worklets, affable, affableRec, tAudioWorkletGenerator, tAudioWorkletGeneratorT, tAudioWorkletProcessor, tPeriodicOsc, tPlay, tPlayBuf, tWaveShaper, toUrlArray)
 
 makeDistortionCurve :: Number -> Array Number
 makeDistortionCurve k =
@@ -28,19 +28,24 @@ makeDistortionCurve k =
 
   deg = pi / 180.0
 
+myWaveShaper :: WaveShaperSignature MyFloatArrays
+myWaveShaper = tWaveShaper (RProxy :: RProxy MyFloatArrays)
+
+myPlay :: PlaySignature MyTracks
+myPlay = tPlay (RProxy :: RProxy MyTracks)
+
 scene :: Number -> Behavior (AudioUnit D1)
 scene =
   const
     $ pure
         ( speaker'
-            ( gain' 0.2
-                $ tWaveShaper
-                    (RProxy :: RProxy MyEnv)
-                    (SProxy :: SProxy "wicked")
+            ( tAudioWorkletProcessor
+                (RProxy :: RProxy MyProcessorsWithParams)
+                (SProxy :: SProxy "myProc")
+                { foo: 1.0, bar: 1.0 }
+                $ myWaveShaper (SProxy :: SProxy "wicked")
                     FourX
-                    ( tPlay
-                        (RProxy :: RProxy MyEnv)
-                        (SProxy :: SProxy "forest")
+                    ( myPlay (SProxy :: SProxy "forest")
                     )
             )
         )
@@ -53,11 +58,22 @@ type MyTracks
   = ( forest :: BrowserAudioTrack
     )
 
+type MyProcessors a b
+  = ( myProc :: a, myOtherProc :: b )
+
+type MyProcessorsWithParams
+  = MyProcessors (SymbolListProxy ("foo" :$ ("bar" :$ NilS))) (SymbolListProxy ("baz" :$ NilS))
+
+type MyProcessorsWithUrls
+  = MyProcessors String String
+
 type MyEnv
   = ( floatArrays :: Aff (Record MyFloatArrays)
     , tracks :: Aff (Record MyTracks)
+    , worklets :: Aff (Record MyProcessorsWithUrls)
     )
 
+env :: Record MyEnv
 env =
   { floatArrays:
       do
@@ -67,11 +83,18 @@ env =
       do
         forest <- liftEffect $ makeAudioTrack "https://freesound.org/data/previews/458/458087_8462944-lq.mp3"
         pure { forest }
-  } ::
-    (Record MyEnv)
+  , worklets:
+      pure
+        { myProc: "https://my.js.proc/hello.js"
+        , myOtherProc: "https://my.js.proc/hello.js"
+        }
+  }
 
 floatArrays :: FloatArrays
 floatArrays = affableRec env.floatArrays
+
+worklets :: Worklets
+worklets = affable $ map (toUrlArray (RProxy :: RProxy MyProcessorsWithParams)) env.worklets
 
 tracks :: Tracks
 tracks = affableRec env.tracks
@@ -85,27 +108,19 @@ __test_tPlay =
   ( tPlay
       ( RProxy ::
           RProxy
-            ( tracks ::
-                Aff
-                  { bassPlease :: BrowserAudioTrack
-                  }
-            )
-      )
-      ( SProxy ::
-          SProxy "bassPlease"
+            ( bassPlease :: BrowserAudioTrack )
       )
   )
+    ( SProxy ::
+        SProxy "bassPlease"
+    )
 
 __test_tPlayBuf :: forall ch. Pos ch => Number -> AudioUnit ch
 __test_tPlayBuf =
   ( tPlayBuf
       ( RProxy ::
           RProxy
-            ( buffers ::
-                Aff
-                  { bassPlease :: BrowserAudioBuffer
-                  }
-            )
+            ( bassPlease :: BrowserAudioBuffer )
       )
       ( SProxy ::
           SProxy "bassPlease"
@@ -117,11 +132,7 @@ __test_tPeriodicOsc =
   ( tPeriodicOsc
       ( RProxy ::
           RProxy
-            ( periodicWaves ::
-                Aff
-                  { wavey :: BrowserPeriodicWave
-                  }
-            )
+            ( wavey :: BrowserPeriodicWave )
       )
       ( SProxy ::
           SProxy "wavey"
@@ -133,14 +144,40 @@ __test_tWaveShaper =
   ( tWaveShaper
       ( RProxy ::
           RProxy
-            ( floatArrays ::
-                ( Aff
-                    { crunch :: BrowserFloatArray
-                    }
-                )
-            )
+            ( crunch :: BrowserFloatArray )
       )
       ( SProxy ::
           SProxy "crunch"
       )
+  )
+
+___wu :: Array String
+___wu = toUrlArray (RProxy :: RProxy ( foo :: Void, bar :: Void )) { foo: "", bar: "" }
+
+__test_tAudioWorkletGenerator ::
+  AudioUnit D1
+__test_tAudioWorkletGenerator =
+  ( tAudioWorkletGenerator
+      ( RProxy ::
+          RProxy
+            ( myProc :: SymbolListProxy (ConsSymbol "foo" (ConsSymbol "bar" NilSymbol)) )
+      )
+      ( SProxy ::
+          SProxy "myProc"
+      )
+      { foo: 1.0, bar: 1.0 }
+  )
+
+__test_tAudioWorkletGeneratorT ::
+  AudioUnit D1
+__test_tAudioWorkletGeneratorT =
+  ( tAudioWorkletGeneratorT
+      ( RProxy ::
+          RProxy
+            ( myProc :: SymbolListProxy (ConsSymbol "foo" (ConsSymbol "bar" NilSymbol)) )
+      )
+      ( SProxy ::
+          SProxy "myProc"
+      )
+      { foo: (AudioParameter { param: 1.0, timeOffset: 0.0 }), bar: (AudioParameter { param: 1.0, timeOffset: 0.0 }) }
   )
