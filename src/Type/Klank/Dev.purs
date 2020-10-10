@@ -1,9 +1,7 @@
 module Type.Klank.Dev where
 
 import Prelude
-
 import Data.Either (Either(..))
-import Data.Maybe (Maybe)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Data.Tuple (snd)
 import Data.Typelevel.Num (class Pos, D1)
@@ -52,22 +50,22 @@ type EnableMicrophone
   = Boolean
 
 type Accumulator accumulator
-  = Maybe accumulator -> (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Worklets
-  = Maybe (Array String) -> (Array String -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = (Array String) -> (Array String -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Tracks
-  = Maybe (Object BrowserAudioTrack) -> (Object BrowserAudioTrack -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = (Object BrowserAudioTrack) -> (Object BrowserAudioTrack -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Buffers
-  = AudioContext -> Maybe (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = AudioContext -> (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type FloatArrays
-  = Maybe (Object BrowserFloatArray) -> (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = (Object BrowserFloatArray) -> (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type PeriodicWaves
-  = AudioContext -> Maybe (Object BrowserPeriodicWave) -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = AudioContext -> (Object BrowserPeriodicWave) -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Main
   = forall accumulator microphones tracks buffers floatArrays periodicWaves.
