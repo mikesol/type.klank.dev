@@ -1,7 +1,9 @@
 module Type.Klank.Dev where
 
 import Prelude
+
 import Data.Either (Either(..))
+import Data.Maybe (Maybe)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Data.Tuple (snd)
 import Data.Typelevel.Num (class Pos, D1)
@@ -9,42 +11,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
-import FRP.Behavior.Audio
-  ( AudioContext
-  , AudioInfo
-  , AudioParameter
-  , AudioUnit
-  , BrowserAudioBuffer
-  , BrowserAudioTrack
-  , BrowserFloatArray
-  , BrowserPeriodicWave
-  , Oversample
-  , VisualInfo
-  , audioWorkletGenerator
-  , audioWorkletGeneratorT
-  , audioWorkletGeneratorT_
-  , audioWorkletGenerator_
-  , audioWorkletProcessor
-  , audioWorkletProcessorT
-  , audioWorkletProcessorT_
-  , audioWorkletProcessor_
-  , loopBuf
-  , loopBufT
-  , loopBufT_
-  , loopBuf_
-  , periodicOsc
-  , periodicOscT
-  , periodicOscT_
-  , periodicOsc_
-  , play
-  , playBuf
-  , playBufT
-  , playBufT_
-  , playBuf_
-  , play_
-  , waveShaper
-  , waveShaper_
-  )
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -85,22 +52,22 @@ type EnableMicrophone
   = Boolean
 
 type Accumulator accumulator
-  = (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = Maybe accumulator -> (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Worklets
-  = (Array String -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = Maybe (Array String) -> (Array String -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Tracks
-  = (Object BrowserAudioTrack -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = Maybe (Object BrowserAudioTrack) -> (Object BrowserAudioTrack -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Buffers
-  = AudioContext -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = AudioContext -> Maybe (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type FloatArrays
-  = (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = Maybe (Object BrowserFloatArray) -> (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type PeriodicWaves
-  = AudioContext -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = AudioContext -> Maybe (Object BrowserPeriodicWave) -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Main
   = forall accumulator microphones tracks buffers floatArrays periodicWaves.

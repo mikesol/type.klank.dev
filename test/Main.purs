@@ -91,13 +91,13 @@ env =
   }
 
 floatArrays :: FloatArrays
-floatArrays = affableRec env.floatArrays
+floatArrays = const $ affableRec env.floatArrays
 
 worklets :: Worklets
-worklets = affable $ map (toUrlArray (RProxy :: RProxy MyProcessorsWithParams)) env.worklets
+worklets = const (affable $ map (toUrlArray (RProxy :: RProxy MyProcessorsWithParams)) env.worklets)
 
 tracks :: Tracks
-tracks = affableRec env.tracks
+tracks = const $ affableRec env.tracks
 
 main :: Main
 main = runInBrowser scene
