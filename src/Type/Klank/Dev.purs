@@ -9,7 +9,8 @@ import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, waveShaper, waveShaper_)
+import FRP.Behavior (Behavior)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -67,8 +68,8 @@ type FloatArrays
 type PeriodicWaves
   = AudioContext -> (Object BrowserPeriodicWave) -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
-type Main
-  = forall accumulator microphones tracks buffers floatArrays periodicWaves.
+type Run accumulator
+  = forall microphones tracks buffers floatArrays periodicWaves.
     accumulator ->
     Int ->
     Int ->
@@ -76,6 +77,35 @@ type Main
     AudioInfo (Object microphones) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
     VisualInfo ->
     Effect (Effect Unit)
+
+type Klank' accumulator
+  = { run :: Run accumulator
+    , periodicWaves :: PeriodicWaves
+    , floatArrays :: FloatArrays
+    , buffers :: Buffers
+    , tracks :: Tracks
+    , worklets :: Worklets
+    , enableMicrophone :: EnableMicrophone
+    , accumulator :: Accumulator accumulator
+    }
+
+type Klank
+  = Klank' Unit
+
+noSound :: Number -> Behavior (AudioUnit D1)
+noSound = const $ pure (speaker' zero)
+
+klank :: Klank
+klank =
+  { run: runInBrowser noSound
+  , periodicWaves: \_ prev res _ -> res prev
+  , floatArrays: \prev res _ -> res prev
+  , buffers: \_ prev res _ -> res prev
+  , tracks: \prev res _ -> res prev
+  , worklets: \prev res _ -> res prev
+  , enableMicrophone: false
+  , accumulator: \res _ -> res unit
+  }
 
 class HasTrack (env :: # Type) (s :: Symbol)
 

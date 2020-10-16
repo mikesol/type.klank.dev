@@ -11,7 +11,7 @@ import FRP.Behavior (Behavior)
 import FRP.Behavior.Audio (AudioParameter(..), AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample(..), makeAudioTrack, makeFloatArray, runInBrowser, speaker')
 import Math (pi, abs)
 import Type.Data.Row (RProxy(..))
-import Type.Klank.Dev (type (:$), ConsSymbol, FloatArrays, Main, NilS, NilSymbol, PlaySignature, SymbolListProxy, Tracks, WaveShaperSignature, Worklets, affable, affableRec, tAudioWorkletGenerator, tAudioWorkletGeneratorT, tAudioWorkletProcessor, tPeriodicOsc, tPlay, tPlayBuf, tWaveShaper, toUrlArray)
+import Type.Klank.Dev (type (:$), ConsSymbol, FloatArrays, Klank, NilS, NilSymbol, PlaySignature, SymbolListProxy, Tracks, WaveShaperSignature, Worklets, affable, affableRec, klank, tAudioWorkletGenerator, tAudioWorkletGeneratorT, tAudioWorkletProcessor, tPeriodicOsc, tPlay, tPlayBuf, tWaveShaper, toUrlArray)
 
 makeDistortionCurve :: Number -> Array Number
 makeDistortionCurve k =
@@ -99,8 +99,14 @@ worklets = const (affable $ map (toUrlArray (RProxy :: RProxy MyProcessorsWithPa
 tracks :: Tracks
 tracks = const $ affableRec env.tracks
 
-main :: Main
-main = runInBrowser scene
+main :: Klank
+main =
+  klank
+    { run = runInBrowser scene
+    , tracks = tracks
+    , worklets = worklets
+    , floatArrays = floatArrays
+    }
 
 --------------------------------
 __test_tPlay :: forall ch. Pos ch => AudioUnit ch
