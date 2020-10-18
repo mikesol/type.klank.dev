@@ -10,7 +10,7 @@ import Effect.Aff (Aff, launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Exporter, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Exporter, Oversample, VisualInfo, EngineInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -71,9 +71,8 @@ type PeriodicWaves
 type Run accumulator env
   = forall microphones tracks buffers floatArrays periodicWaves.
     accumulator ->
-    Int ->
-    Int ->
     AudioContext ->
+    EngineInfo ->
     AudioInfo (Object microphones) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
     VisualInfo ->
     Exporter env ->
@@ -89,6 +88,7 @@ type Klank'' accumulator env
     , enableMicrophone :: EnableMicrophone
     , accumulator :: Accumulator accumulator
     , exporter :: Exporter env
+    , engineInfo :: EngineInfo
     }
 
 type Klank' accumulator
@@ -99,6 +99,15 @@ type Klank
 
 noSound :: Number -> Behavior (AudioUnit D1)
 noSound = const $ pure (speaker' zero)
+
+defaultEngineInfo =
+  { msBetweenSamples: 20
+  , msBetweenPings: 15
+  , fastforwardLowerBound: 0.025
+  , rewindUpperBound: 0.15
+  , initialOffset: 0.1
+  } ::
+    EngineInfo
 
 klank :: Klank
 klank =
@@ -111,6 +120,7 @@ klank =
   , enableMicrophone: false
   , accumulator: \res _ -> res unit
   , exporter: defaultExporter
+  , engineInfo: defaultEngineInfo
   }
 
 class HasTrack (env :: # Type) (s :: Symbol)
