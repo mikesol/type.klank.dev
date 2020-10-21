@@ -1,16 +1,20 @@
 module Type.Klank.Dev where
 
 import Prelude
+import Control.Promise (toAffE)
+import Data.Array (filter)
 import Data.Either (Either(..))
+import Data.Lens (_2, over)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
-import Data.Tuple (snd)
+import Data.Traversable (sequence)
+import Data.Tuple (Tuple, fst, snd)
 import Data.Typelevel.Num (class Pos, D1)
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_, try)
+import Effect.Aff (Aff, launchAff_, parallel, sequential, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Exporter, Oversample, VisualInfo, EngineInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, EngineInfo, Exporter, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -24,6 +28,22 @@ import Type.Row.Homogeneous (class Homogeneous)
 
 data SymbolListProxy (s :: SymbolList)
   = SymbolListProxy
+
+makeBuffersUsingCache :: Array (Tuple String String) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+makeBuffersUsingCache newB ctx prev =
+  affable do
+    sequential
+      ( O.union <$> (pure prev)
+          <*> ( sequence
+                $ O.fromFoldable
+                    ( map
+                        ( over _2
+                            (parallel <<< toAffE <<< decodeAudioDataFromUri ctx)
+                        )
+                        (filter (not <<< flip O.member prev <<< fst) newB)
+                    )
+            )
+      )
 
 affableRec ::
   forall (a :: # Type) b.
