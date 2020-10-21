@@ -7,7 +7,7 @@ import Data.Either (Either(..))
 import Data.Lens (_2, over)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Data.Traversable (sequence)
-import Data.Tuple (Tuple, fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Data.Typelevel.Num (class Pos, D1)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, parallel, sequential, try)
@@ -29,8 +29,8 @@ import Type.Row.Homogeneous (class Homogeneous)
 data SymbolListProxy (s :: SymbolList)
   = SymbolListProxy
 
-makeBuffersUsingCache :: Array (Tuple String String) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
-makeBuffersUsingCache newB ctx prev =
+makeBuffersUsingCache :: (Object BrowserAudioBuffer -> Tuple (Array (Tuple String String)) (Object BrowserAudioBuffer)) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+makeBuffersUsingCache bf ctx prev' =
   affable do
     sequential
       ( O.union <$> (pure prev)
@@ -44,6 +44,11 @@ makeBuffersUsingCache newB ctx prev =
                     )
             )
       )
+  where
+  (Tuple newB prev) = bf prev'
+
+makeBuffersKeepingCache :: Array (Tuple String String) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+makeBuffersKeepingCache = makeBuffersUsingCache <<< Tuple
 
 affableRec ::
   forall (a :: # Type) b.
