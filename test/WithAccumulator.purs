@@ -4,7 +4,7 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Num (D1)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (IAudioUnit(..), runInBrowser, sinOsc, speaker')
+import FRP.Behavior.Audio (IAudioUnit(..), defaultExporter, runInBrowser, sinOsc, speaker')
 import Type.Klank.Dev (Klank', affable, klank)
 
 scene ::
@@ -25,4 +25,5 @@ main =
   klank
     { run = runInBrowser scene
     , accumulator = affable $ pure ({ onset: Just 1.0 })
+    , exporter = defaultExporter
     }

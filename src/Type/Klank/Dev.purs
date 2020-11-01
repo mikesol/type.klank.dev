@@ -100,7 +100,7 @@ type Run accumulator env
     EngineInfo ->
     AudioInfo (Object microphones) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
     VisualInfo ->
-    Exporter env ->
+    Exporter env accumulator ->
     Effect (Effect Unit)
 
 type Klank'' accumulator env
@@ -112,7 +112,7 @@ type Klank'' accumulator env
     , worklets :: Worklets
     , enableMicrophone :: EnableMicrophone
     , accumulator :: Accumulator accumulator
-    , exporter :: Exporter env
+    , exporter :: Exporter env accumulator
     , engineInfo :: EngineInfo
     }
 
