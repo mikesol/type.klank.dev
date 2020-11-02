@@ -256,7 +256,7 @@ tPlayBufT ::
   IsSymbol s =>
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   AudioUnit ch
 tPlayBufT _ s = playBufT (reflectSymbol s)
 
@@ -267,7 +267,7 @@ type PlayBufTSignature (myBuffers :: # Type)
     Cons s a t myBuffers =>
     IsSymbol s =>
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     AudioUnit ch
 
 tPlayBufT_ ::
@@ -278,7 +278,7 @@ tPlayBufT_ ::
   String ->
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   AudioUnit ch
 tPlayBufT_ n _ s = playBufT_ n (reflectSymbol s)
 
@@ -290,7 +290,7 @@ type PlayBufT_Signature (myBuffers :: # Type)
     IsSymbol s =>
     String ->
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     AudioUnit ch
 
 tLoopBuf ::
@@ -352,7 +352,7 @@ tLoopBufT ::
   IsSymbol s =>
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   Number ->
   Number ->
   AudioUnit ch
@@ -365,7 +365,7 @@ type LoopBufTSignature (myBuffers :: # Type)
     Cons s a t myBuffers =>
     IsSymbol s =>
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     Number ->
     Number ->
     AudioUnit ch
@@ -378,7 +378,7 @@ tLoopBufT_ ::
   String ->
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   Number ->
   Number ->
   AudioUnit ch
@@ -392,7 +392,7 @@ type LoopBufT_Signature (myBuffers :: # Type)
     IsSymbol s =>
     String ->
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     Number ->
     Number ->
     AudioUnit ch
@@ -453,7 +453,7 @@ tPeriodicOscT ::
   IsSymbol s =>
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   AudioUnit D1
 tPeriodicOscT _ s = periodicOscT (reflectSymbol s)
 
@@ -464,7 +464,7 @@ type PeriodicOscTSignature (periodicWaves :: # Type)
     Cons s a t periodicWaves =>
     IsSymbol s =>
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     AudioUnit ch
 
 tPeriodicOscT_ ::
@@ -474,7 +474,7 @@ tPeriodicOscT_ ::
   String ->
   RProxy env ->
   SProxy s ->
-  AudioParameter Number ->
+  AudioParameter ->
   AudioUnit D1
 tPeriodicOscT_ n _ s = periodicOscT_ n (reflectSymbol s)
 
@@ -486,7 +486,7 @@ type PeriodicOscT_Signature (periodicWaves :: # Type)
     IsSymbol s =>
     String ->
     SProxy s ->
-    AudioParameter Number ->
+    AudioParameter ->
     AudioUnit ch
 
 class HasFloatArray (env :: # Type) (s :: Symbol)
@@ -647,7 +647,7 @@ tAudioWorkletGenerator_ n _ s p = audioWorkletGenerator_ n (reflectSymbol s) (fr
 tAudioWorkletGeneratorT ::
   forall (env :: # Type) (s :: Symbol) (params :: # Type).
   HasAudioWorklet env s params =>
-  Homogeneous params (AudioParameter Number) =>
+  Homogeneous params AudioParameter =>
   IsSymbol s =>
   RProxy env ->
   SProxy s ->
@@ -658,7 +658,7 @@ tAudioWorkletGeneratorT _ s p = audioWorkletGeneratorT (reflectSymbol s) (fromHo
 tAudioWorkletGeneratorT_ ::
   forall (env :: # Type) (s :: Symbol) (params :: # Type).
   HasAudioWorklet env s params =>
-  Homogeneous params (AudioParameter Number) =>
+  Homogeneous params AudioParameter =>
   IsSymbol s =>
   String ->
   RProxy env ->
@@ -698,7 +698,7 @@ tAudioWorkletProcessorT ::
   forall (env :: # Type) (s :: Symbol) (params :: # Type) ch.
   Pos ch =>
   HasAudioWorklet env s params =>
-  Homogeneous params (AudioParameter Number) =>
+  Homogeneous params AudioParameter =>
   IsSymbol s =>
   RProxy env ->
   SProxy s ->
@@ -711,7 +711,7 @@ tAudioWorkletProcessorT_ ::
   forall (env :: # Type) (s :: Symbol) (params :: # Type) ch.
   Pos ch =>
   HasAudioWorklet env s params =>
-  Homogeneous params (AudioParameter Number) =>
+  Homogeneous params AudioParameter =>
   IsSymbol s =>
   String ->
   RProxy env ->

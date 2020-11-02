@@ -8,7 +8,7 @@ import Data.Typelevel.Num (class Pos, D1)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioParameter(..), AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample(..), makeAudioTrack, makeFloatArray, runInBrowser, speaker')
+import FRP.Behavior.Audio (AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Oversample(..), defaultParam, makeAudioTrack, makeFloatArray, runInBrowser, speaker')
 import Math (pi, abs)
 import Type.Data.Row (RProxy(..))
 import Type.Klank.Dev (type (:$), ConsSymbol, FloatArrays, Klank, NilS, NilSymbol, PlaySignature, SymbolListProxy, Tracks, WaveShaperSignature, Worklets, affable, affableRec, klank, tAudioWorkletGenerator, tAudioWorkletGeneratorT, tAudioWorkletProcessor, tPeriodicOsc, tPlay, tPlayBuf, tWaveShaper, toUrlArray)
@@ -185,5 +185,7 @@ __test_tAudioWorkletGeneratorT =
       ( SProxy ::
           SProxy "myProc"
       )
-      { foo: (AudioParameter { param: 1.0, timeOffset: 0.0 }), bar: (AudioParameter { param: 1.0, timeOffset: 0.0 }) }
+      { foo: (defaultParam { param = 1.0, timeOffset = 0.0 })
+      , bar: (defaultParam { param = 1.0, timeOffset = 0.0 })
+      }
   )
