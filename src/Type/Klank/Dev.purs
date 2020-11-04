@@ -14,7 +14,7 @@ import Effect.Aff (Aff, launchAff_, parallel, sequential, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, EngineInfo, Exporter, Oversample, VisualInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Exporter, Oversample, VisualInfo, EngineInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -78,6 +78,9 @@ type EnableMicrophone
 type Accumulator accumulator
   = (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
+type AsyncEngineInfo
+  = (EngineInfo -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
 type Worklets
   = (Array String) -> (Array String -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
@@ -113,7 +116,7 @@ type Klank'' accumulator env
     , enableMicrophone :: EnableMicrophone
     , accumulator :: Accumulator accumulator
     , exporter :: Exporter env accumulator
-    , engineInfo :: EngineInfo
+    , engineInfo :: AsyncEngineInfo
     }
 
 type Klank' accumulator
@@ -146,7 +149,7 @@ klank =
   , enableMicrophone: false
   , accumulator: \res _ -> res unit
   , exporter: defaultExporter
-  , engineInfo: defaultEngineInfo
+  , engineInfo: \res _ -> res defaultEngineInfo
   }
 
 class HasTrack (env :: # Type) (s :: Symbol)
