@@ -90,8 +90,10 @@ type Tracks
 type Buffers
   = AudioContext -> (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
+-- two caches - the current kv pairs of recorders
+-- and the current functions that record
 type Recorders
-  = (String -> String -> Effect Unit) -> Object (RecorderSignature MediaRecorder) -> (Object (RecorderSignature MediaRecorder) -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+  = Object String -> (String -> String -> Effect Unit) -> Object (RecorderSignature MediaRecorder) -> (Object (RecorderSignature MediaRecorder) -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type FloatArrays
   = (Object BrowserFloatArray) -> (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
@@ -147,7 +149,8 @@ klank =
   { run: runInBrowser noSound
   , periodicWaves: \_ prev res _ -> res prev
   , floatArrays: \prev res _ -> res prev
-  , recorders: \_ prev res _ -> res prev
+  , recorders:
+      \_ _ prev res _ -> res prev
   , buffers: \_ prev res _ -> res prev
   , tracks: \prev res _ -> res prev
   , worklets: \prev res _ -> res prev
