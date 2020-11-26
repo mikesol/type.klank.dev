@@ -14,7 +14,7 @@ import Effect.Aff (Aff, launchAff_, parallel, sequential, try)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, Exporter, Oversample, VisualInfo, EngineInfo, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, EngineInfo, Exporter, MediaRecorder, Oversample, VisualInfo, RecorderSignature, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -90,6 +90,9 @@ type Tracks
 type Buffers
   = AudioContext -> (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
+type Recorders
+  = (String -> String -> Effect Unit) -> Object (RecorderSignature MediaRecorder) -> (Object (RecorderSignature MediaRecorder) -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
 type FloatArrays
   = (Object BrowserFloatArray) -> (Object BrowserFloatArray -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
@@ -97,11 +100,11 @@ type PeriodicWaves
   = AudioContext -> (Object BrowserPeriodicWave) -> (Object BrowserPeriodicWave -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
 type Run accumulator env
-  = forall microphones tracks buffers floatArrays periodicWaves.
+  = forall microphones recorders tracks buffers floatArrays periodicWaves.
     accumulator ->
     AudioContext ->
     EngineInfo ->
-    AudioInfo (Object microphones) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
+    AudioInfo (Object microphones) (Object (RecorderSignature recorders)) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
     VisualInfo ->
     Exporter env accumulator ->
     Effect (Effect Unit)
