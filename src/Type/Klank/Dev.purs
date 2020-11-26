@@ -113,6 +113,7 @@ type Klank'' accumulator env
   = { run :: Run accumulator env
     , periodicWaves :: PeriodicWaves
     , floatArrays :: FloatArrays
+    , recorders :: Recorders
     , buffers :: Buffers
     , tracks :: Tracks
     , worklets :: Worklets
@@ -146,6 +147,7 @@ klank =
   { run: runInBrowser noSound
   , periodicWaves: \_ prev res _ -> res prev
   , floatArrays: \prev res _ -> res prev
+  , recorders: \_ prev res _ -> res prev
   , buffers: \_ prev res _ -> res prev
   , tracks: \prev res _ -> res prev
   , worklets: \prev res _ -> res prev
