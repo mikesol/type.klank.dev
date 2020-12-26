@@ -25,6 +25,7 @@ import Prim.Symbol (class Compare)
 import Type.Data.Boolean (class And, class Or)
 import Type.Data.Row (RProxy)
 import Type.Row.Homogeneous (class Homogeneous)
+import Web.HTML (HTMLCanvasElement, HTMLImageElement, HTMLVideoElement)
 
 data SymbolListProxy (s :: SymbolList)
   = SymbolListProxy
@@ -87,6 +88,15 @@ type Worklets
 type Tracks
   = (Object BrowserAudioTrack) -> (Object BrowserAudioTrack -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
+type Images
+  = (Object HTMLImageElement) -> (Object HTMLImageElement -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
+type Videos
+  = (Object HTMLVideoElement) -> (Object HTMLVideoElement -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
+type Canvases
+  = (Object HTMLCanvasElement) -> (Object HTMLCanvasElement -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
 type Buffers
   = AudioContext -> (Object BrowserAudioBuffer) -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
@@ -118,6 +128,9 @@ type Klank'' accumulator env
     , recorders :: Recorders
     , buffers :: Buffers
     , tracks :: Tracks
+    , images :: Images
+    , videos :: Videos
+    , canvases :: Canvases
     , worklets :: Worklets
     , enableMicrophone :: EnableMicrophone
     , accumulator :: Accumulator accumulator
@@ -153,6 +166,9 @@ klank =
       \_ _ prev res _ -> res prev
   , buffers: \_ prev res _ -> res prev
   , tracks: \prev res _ -> res prev
+  , images: \prev res _ -> res prev
+  , videos: \prev res _ -> res prev
+  , canvases: \prev res _ -> res prev
   , worklets: \prev res _ -> res prev
   , enableMicrophone: false
   , accumulator: \res _ -> res unit
