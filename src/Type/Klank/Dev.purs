@@ -1,20 +1,13 @@
 module Type.Klank.Dev where
 
 import Prelude
-import Control.Promise (toAffE)
-import Data.Array (filter)
-import Data.Either (Either(..))
-import Data.Lens (_2, over)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
-import Data.Traversable (sequence)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (snd)
 import Data.Typelevel.Num (class Pos, D1)
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_, parallel, sequential, try)
-import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import FRP.Behavior (Behavior)
-import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, EngineInfo, Exporter, MediaRecorder, Oversample, VisualInfo, RecorderSignature, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, decodeAudioDataFromUri, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
+import FRP.Behavior.Audio (AudioContext, AudioInfo, AudioParameter, AudioUnit, BrowserAudioBuffer, BrowserAudioTrack, BrowserFloatArray, BrowserPeriodicWave, EngineInfo, Exporter, MediaRecorder, Oversample, VisualInfo, RecorderSignature, audioWorkletGenerator, audioWorkletGeneratorT, audioWorkletGeneratorT_, audioWorkletGenerator_, audioWorkletProcessor, audioWorkletProcessorT, audioWorkletProcessorT_, audioWorkletProcessor_, defaultExporter, loopBuf, loopBufT, loopBufT_, loopBuf_, periodicOsc, periodicOscT, periodicOscT_, periodicOsc_, play, playBuf, playBufT, playBufT_, playBuf_, play_, runInBrowser, speaker', waveShaper, waveShaper_)
 import Foreign.Object (Object, fromHomogeneous)
 import Foreign.Object as O
 import Prim.Boolean (False, True, kind Boolean)
@@ -29,49 +22,6 @@ import Web.HTML (HTMLCanvasElement, HTMLImageElement, HTMLVideoElement)
 
 data SymbolListProxy (s :: SymbolList)
   = SymbolListProxy
-
-makeBuffersUsingCache :: (Object BrowserAudioBuffer -> Tuple (Array (Tuple String String)) (Object BrowserAudioBuffer)) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
-makeBuffersUsingCache bf ctx prev' =
-  affable do
-    sequential
-      ( O.union <$> (pure prev)
-          <*> ( sequence
-                $ O.fromFoldable
-                    ( map
-                        ( over _2
-                            (parallel <<< toAffE <<< decodeAudioDataFromUri ctx)
-                        )
-                        (filter (not <<< flip O.member prev <<< fst) newB)
-                    )
-            )
-      )
-  where
-  (Tuple newB prev) = bf prev'
-
-makeBuffersKeepingCache :: Array (Tuple String String) -> AudioContext -> Object BrowserAudioBuffer -> (Object BrowserAudioBuffer -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
-makeBuffersKeepingCache = makeBuffersUsingCache <<< Tuple
-
-affableRec ::
-  forall (a :: # Type) b.
-  Homogeneous a b =>
-  Aff (Record a) ->
-  (Object b -> Effect Unit) ->
-  (Error -> Effect Unit) ->
-  Effect Unit
-affableRec aff res rej =
-  launchAff_ do
-    result <- try $ aff
-    case result of
-      Left err -> liftEffect $ rej err
-      Right resp -> liftEffect $ res (fromHomogeneous resp)
-
-affable :: forall a. Aff a -> (a -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
-affable aff res rej =
-  launchAff_ do
-    result <- try $ aff
-    case result of
-      Left err -> liftEffect $ rej err
-      Right resp -> liftEffect $ res resp
 
 type EnableMicrophone
   = Boolean
