@@ -26,6 +26,9 @@ data SymbolListProxy (s :: SymbolList)
 type EnableMicrophone
   = Boolean
 
+type EnableCamera
+  = Boolean
+
 type Accumulator accumulator
   = (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
 
@@ -83,6 +86,7 @@ type Klank'' accumulator env
     , canvases :: Canvases
     , worklets :: Worklets
     , enableMicrophone :: EnableMicrophone
+    , enableCamera :: EnableCamera
     , accumulator :: Accumulator accumulator
     , exporter :: Exporter env accumulator
     , engineInfo :: AsyncEngineInfo
@@ -121,6 +125,7 @@ klank =
   , canvases: \prev res _ -> res prev
   , worklets: \prev res _ -> res prev
   , enableMicrophone: false
+  , enableCamera: false
   , accumulator: \res _ -> res unit
   , exporter: defaultExporter
   , engineInfo: \res _ -> res defaultEngineInfo
