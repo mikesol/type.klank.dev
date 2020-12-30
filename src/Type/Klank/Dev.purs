@@ -1,8 +1,9 @@
 module Type.Klank.Dev where
 
 import Prelude
+import Data.List.Lazy (List)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
-import Data.Tuple (snd)
+import Data.Tuple (Tuple, snd)
 import Data.Typelevel.Num (class Pos, D1)
 import Effect (Effect)
 import Effect.Exception (Error)
@@ -31,6 +32,9 @@ type EnableCamera
 
 type Accumulator accumulator
   = (accumulator -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
+
+type WebcamCache accumulator
+  = accumulator -> Number -> List (Tuple Number HTMLCanvasElement) -> List (Tuple Number HTMLCanvasElement)
 
 type AsyncEngineInfo
   = (EngineInfo -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit
@@ -83,6 +87,7 @@ type Klank'' accumulator env
     , tracks :: Tracks
     , images :: Images
     , videos :: Videos
+    , webcamCache :: WebcamCache accumulator
     , canvases :: Canvases
     , worklets :: Worklets
     , enableMicrophone :: EnableMicrophone
@@ -126,6 +131,7 @@ klank =
   , worklets: \prev res _ -> res prev
   , enableMicrophone: false
   , enableCamera: false
+  , webcamCache: \_ _ -> identity
   , accumulator: \res _ -> res unit
   , exporter: defaultExporter
   , engineInfo: \res _ -> res defaultEngineInfo
