@@ -1,7 +1,7 @@
 module Type.Klank.Dev where
 
 import Prelude
-import Data.List (List)
+import Data.List (List, take)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Data.Tuple (Tuple, snd)
 import Data.Typelevel.Num (class Pos, D1)
@@ -131,7 +131,7 @@ klank =
   , worklets: \prev res _ -> res prev
   , enableMicrophone: false
   , enableCamera: false
-  , webcamCache: \_ _ -> identity
+  , webcamCache: \_ _ -> take 10
   , accumulator: \res _ -> res unit
   , exporter: defaultExporter
   , engineInfo: \res _ -> res defaultEngineInfo
