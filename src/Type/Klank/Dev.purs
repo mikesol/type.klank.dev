@@ -67,7 +67,7 @@ type Run accumulator env
     AudioContext ->
     EngineInfo ->
     AudioInfo (Object microphones) (Object (RecorderSignature recorders)) (Object tracks) (Object buffers) (Object floatArrays) (Object periodicWaves) ->
-    VisualInfo ->
+    VisualInfo accumulator ->
     Exporter env accumulator ->
     Effect (Effect Unit)
 
