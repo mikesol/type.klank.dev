@@ -1,7 +1,7 @@
 module Type.Klank.Dev where
 
 import Prelude
-import Data.List.Lazy (List)
+import Data.List (List)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Data.Tuple (Tuple, snd)
 import Data.Typelevel.Num (class Pos, D1)
